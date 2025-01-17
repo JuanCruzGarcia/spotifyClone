@@ -9,7 +9,6 @@ const Sidebar = ({ spotifyToken, setContent, setPlaylistTracks }) => {
 
   useEffect(() => {
     if (spotifyToken) {
-      // Llama a la API de Spotify para obtener las playlists
       getPlaylists(spotifyToken).then((data) => {
         setPlaylists(data);
       });
@@ -17,17 +16,15 @@ const Sidebar = ({ spotifyToken, setContent, setPlaylistTracks }) => {
   }, [spotifyToken]);
 
   const handlePlaylistClick = (playlistId) => {
-    // Obtener las canciones de la playlist seleccionada
     getPlaylistTracks(playlistId, spotifyToken)
       .then((tracks) => {
-        // Actualizar el estado de las canciones de la playlist en el Layout
         setPlaylistTracks(tracks);
-        setContent('playlist'); // Cambiar el contenido dinámico a "playlist"
+        setContent('playlist');
       })
       .catch((error) => console.error('Error fetching playlist tracks:', error));
   };
   return (
-    <div className="h-screen w-64 bg-black text-gray-400 flex flex-col">
+    <div className="h-screen w-64 bg-black text-gray-400 flex flex-col overflow-y-auto">
     <div className="p-4 text-white text-xl font-bold border-b border-gray-800">
       Spotify Clone
     </div>
@@ -66,7 +63,7 @@ const Sidebar = ({ spotifyToken, setContent, setPlaylistTracks }) => {
             <li
               key={playlist.id}
               className="hover:text-green-500 cursor-pointer"
-              onClick={() => handlePlaylistClick(playlist.id)} // Maneja el clic en la playlist
+              onClick={() => handlePlaylistClick(playlist.id)}
             >
               {playlist.name}
             </li>
