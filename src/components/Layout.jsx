@@ -6,9 +6,17 @@ const Layout = ({ children }) => {
   const spotifyToken = localStorage.getItem('spotifyToken');
   const [content, setContent] = useState('home');
   const [playlistTracks, setPlaylistTracks] = useState([]);
+  const [playlistDetails, setPlaylistDetails] = useState(null); // Nuevo estado
 
   const renderContent = () => {
     switch (content) {
+      case 'playlist':
+        return (
+          <PlaylistTracks
+            playlistTracks={playlistTracks}
+            playlistDetails={playlistDetails} // Pasa los detalles aquí
+          />
+        );
       case 'home':
         return (
           <div className="p-6">
@@ -16,22 +24,6 @@ const Layout = ({ children }) => {
             <p>Selecciona una playlist o explora tu música favorita.</p>
           </div>
         );
-      case 'search':
-        return (
-          <div className="p-6">
-            <h1 className="text-2xl font-bold">Buscar</h1>
-            <p>Busca tus canciones, artistas o álbumes favoritos.</p>
-          </div>
-        );
-      case 'library':
-        return (
-          <div className="p-6">
-            <h1 className="text-2xl font-bold">Tu Biblioteca</h1>
-            <p>Aquí están tus playlists y canciones guardadas.</p>
-          </div>
-        );
-        case 'playlist':
-      return <PlaylistTracks playlistTracks={playlistTracks} />; 
       default:
         return (
           <div className="p-6">
@@ -44,7 +36,12 @@ const Layout = ({ children }) => {
 
   return (
     <div className="flex h-screen">
-      <Sidebar spotifyToken={spotifyToken} setContent={setContent} setPlaylistTracks={setPlaylistTracks} />
+      <Sidebar
+        spotifyToken={spotifyToken}
+        setContent={setContent}
+        setPlaylistTracks={setPlaylistTracks}
+        setPlaylistDetails={setPlaylistDetails} // Pasa la función al Sidebar
+      />
       <div className="flex-1 bg-gray-900 text-white overflow-y-auto">
         {renderContent()}
       </div>

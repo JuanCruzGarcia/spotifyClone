@@ -26,10 +26,8 @@ export const getPlaylists = async (spotifyToken) => {
       });
   
       if (response.status === 401) {
-        // Token expirado
         localStorage.removeItem("spotifyToken");
-        window.location.href = "/login"; // Redirige al login
-        return [];
+        window.location.href = "/login";
       }
   
       if (!response.ok) {
@@ -53,9 +51,8 @@ export const getPlaylists = async (spotifyToken) => {
     });
     
     if (response.status === 401) {
-      // Token expirado
       localStorage.removeItem("spotifyToken");
-      window.location.href = "/login"; // Redirige al login
+      window.location.href = "/login";
       return [];
     }
   
@@ -64,5 +61,29 @@ export const getPlaylists = async (spotifyToken) => {
     }
   
     const data = await response.json();
-    return data.items.map(item => item.track); // Solo devolver las canciones
+    return data.items.map(item => item.track);
+  };
+  
+  export const getPlaylistDetails = async (playlistId, spotifyToken) => {
+    console.log('Calling API for playlist details:', playlistId); // <-- Log para ver el ID
+    const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${spotifyToken}`,
+      },
+    });
+  
+    if (response.status === 401) {
+      localStorage.removeItem('spotifyToken');
+      window.location.href = '/login';
+      return null;
+    }
+  
+    if (!response.ok) {
+      throw new Error('Failed to fetch playlist details');
+    }
+  
+    const data = await response.json();
+    console.log('Playlist details response:', data); // <-- Log de la respuesta completa
+    return data;
   };
