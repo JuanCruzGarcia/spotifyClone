@@ -10,6 +10,7 @@ const Sidebar = ({ spotifyToken, setContent, setPlaylistTracks, setPlaylistDetai
   useEffect(() => {
     if (spotifyToken) {
       getPlaylists(spotifyToken).then((data) => {
+        console.log("Playlists data:", data);
         setPlaylists(data);
       });
     }
@@ -33,33 +34,55 @@ const Sidebar = ({ spotifyToken, setContent, setPlaylistTracks, setPlaylistDetai
   };
 
   return (
-    <div className="h-screen w-64 bg-black text-gray-400 flex flex-col overflow-y-auto">
+    <div className="h-screen bg-black text-gray-400 flex flex-col overflow-y-auto overflow-y-scroll custom-scrollbar">
       <div className="p-4 text-white text-xl font-bold border-b border-gray-800">
         Spotify Clone
       </div>
       <nav className="flex-1 p-4 space-y-4">
         <a
           href="#"
-          onClick={() => setContent('home')}
+          onClick={() => setContent("home")}
           className="flex items-center space-x-4 text-white hover:text-green-500"
         >
           Inicio
         </a>
       </nav>
-      <div className="p-4 space-y-4">
+      <div className="p-2 space-y-4">
         <div className="border-t border-gray-800 pt-4">
           <p className="text-gray-500 uppercase text-xs mb-2">Tus Playlists</p>
-          <ul className="space-y-2 text-sm">
-            {playlists.map((playlist) => (
-              <li
-                key={playlist.id}
-                className="hover:text-green-500 cursor-pointer"
-                onClick={() => handlePlaylistClick(playlist.id)}
-              >
-                {playlist.name}
-              </li>
-            ))}
-          </ul>
+          {playlists && playlists.length > 0 ? (
+            <ul className="space-y-1 text-sm">
+              {playlists.map((playlist) => (
+                <li
+                  key={playlist.id}
+                  className="flex items-center space-x-3 hover:bg-[#343434] p-1 rounded-lg cursor-pointer"
+                  onClick={() => handlePlaylistClick(playlist.id)}
+                >
+                  {/* Imagen de la playlist */}
+                  {playlist.images?.[0]?.url ? (
+                    <img
+                      src={playlist.images[0].url}
+                      alt={playlist.name}
+                      className="w-14 h-14 rounded-lg object-cover"
+                    />
+                  ) : (
+                    <div className="w-14 h-14 rounded-lg bg-gray-700 flex items-center justify-center text-xs text-gray-400">
+                      No Image
+                    </div>
+                  )}
+                  {/* Información de la playlist */}
+                  <div>
+                    <p className="text-white font-semibold truncate text-base">{playlist.name}</p>
+                    <p className="text-gray-400 text-sm font-semibold">
+                      {playlist.type} · {playlist.owner.display_name}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-500 text-sm">No se encontraron playlists.</p>
+          )}
         </div>
       </div>
     </div>
