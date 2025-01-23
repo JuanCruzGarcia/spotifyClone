@@ -10,7 +10,6 @@ const Sidebar = ({ spotifyToken, setContent, setPlaylistTracks, setPlaylistDetai
   useEffect(() => {
     if (spotifyToken) {
       getPlaylists(spotifyToken).then((data) => {
-        console.log("Playlists data:", data);
         setPlaylists(data);
       });
     }
@@ -18,15 +17,12 @@ const Sidebar = ({ spotifyToken, setContent, setPlaylistTracks, setPlaylistDetai
 
   const handlePlaylistClick = async (playlistId) => {
     try {
-      console.log('Fetching playlist details for:', playlistId); // <-- Log antes de la petición
       const [tracks, details] = await Promise.all([
         getPlaylistTracks(playlistId, spotifyToken),
         getPlaylistDetails(playlistId, spotifyToken),
-      ]);
-      console.log('Fetched details:', details); // <-- Log después de la petición
-  
+      ]);  
       setPlaylistTracks(tracks);
-      setPlaylistDetails(details); // Actualiza los detalles de la playlist
+      setPlaylistDetails(details);
       setContent('playlist');
     } catch (error) {
       console.error('Error fetching playlist data:', error);
@@ -58,7 +54,6 @@ const Sidebar = ({ spotifyToken, setContent, setPlaylistTracks, setPlaylistDetai
                   className="flex items-center space-x-3 hover:bg-[#343434] p-1 rounded-lg cursor-pointer"
                   onClick={() => handlePlaylistClick(playlist.id)}
                 >
-                  {/* Imagen de la playlist */}
                   {playlist.images?.[0]?.url ? (
                     <img
                       src={playlist.images[0].url}
@@ -70,7 +65,6 @@ const Sidebar = ({ spotifyToken, setContent, setPlaylistTracks, setPlaylistDetai
                       No Image
                     </div>
                   )}
-                  {/* Información de la playlist */}
                   <div>
                     <p className="text-white font-semibold truncate text-base">{playlist.name}</p>
                     <p className="text-gray-400 text-sm font-semibold">

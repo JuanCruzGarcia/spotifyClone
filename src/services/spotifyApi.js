@@ -65,7 +65,6 @@ export const getPlaylists = async (spotifyToken) => {
   };
   
   export const getPlaylistDetails = async (playlistId, spotifyToken) => {
-    console.log('Calling API for playlist details:', playlistId); // <-- Log para ver el ID
     const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}`, {
       method: 'GET',
       headers: {
@@ -84,6 +83,5 @@ export const getPlaylists = async (spotifyToken) => {
     }
   
     const data = await response.json();
-    console.log('Playlist details response:', data); // <-- Log de la respuesta completa
     return data;
   };

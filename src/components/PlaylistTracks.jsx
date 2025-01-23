@@ -1,27 +1,24 @@
 import React from 'react';
 
-const PlaylistTracks = ({ playlistTracks, playlistDetails }) => {
+const PlaylistTracks = ({ playlistTracks, playlistDetails, tracks, setCurrentTrack  }) => {
   if (!playlistDetails) return null;
 
   return (
     <div className="px-2 pt-4 pb-2">
-      {/* Detalles de la playlist */}
       <div className="mb-6 flex">
-  <img
-    src={playlistDetails.images[0]?.url}
-    alt={playlistDetails.name}
-    className="w-48 h-48 rounded-lg mb-4 mt-4"
-  />
-  <div className="flex flex-col justify-center ml-4">
-    <p className="text-sm font-semibold text-white ml-2">
-      {playlistDetails.public ? 'Playlist Pública' : 'Playlist Privada'}
-    </p>
-    <h1 className="text-7xl font-bold text-white">{playlistDetails.name}</h1>
-    <p className="text-sm font-bold text-white mt-3 ml-2">{playlistDetails.owner.display_name}</p>
+    <img
+      src={playlistDetails.images[0]?.url}
+      alt={playlistDetails.name}
+      className="w-48 h-48 rounded-lg mb-4 mt-4"
+    />
+    <div className="flex flex-col justify-center ml-4">
+      <p className="text-sm font-semibold text-white ml-2">
+        {playlistDetails.public ? 'Playlist Pública' : 'Playlist Privada'}
+      </p>
+      <h1 className="text-7xl font-bold text-white">{playlistDetails.name}</h1>
+      <p className="text-sm font-bold text-white mt-3 ml-2">{playlistDetails.owner.display_name}</p>
+    </div>
   </div>
-</div>
-
-      {/* Lista de tracks */}
       <div className="overflow-x-auto">
         <table className="min-w-full table-auto rounded-lg shadow-lg bg-black text-white">
           <thead>
@@ -34,7 +31,7 @@ const PlaylistTracks = ({ playlistTracks, playlistDetails }) => {
           </thead>
           <tbody>
             {playlistTracks.map((track, index) => (
-              <tr key={track.id} className="hover:bg-[#343434] transition-colors duration-200 h-6">
+              <tr key={track.id} className="hover:bg-[#343434] transition-colors duration-200 h-6" onClick={() => setCurrentTrack(track)}>
                 <td className="px-6 py-2 text-sm text-gray-400">{index + 1}</td>
                 <td className="px-6 py-2 text-sm flex items-start">
                   <img
