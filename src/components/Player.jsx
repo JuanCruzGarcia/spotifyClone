@@ -1,9 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 const Player = ({ track }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [player, setPlayer] = useState(null);
   const [sdkReady, setSdkReady] = useState(false);
+  const [deviceId, setDeviceId] = useState(null);
+  const [volume, setVolume] = useState(0.5);
   const spotifyToken = localStorage.getItem("spotifyToken");
 
   useEffect(() => {
@@ -11,72 +13,136 @@ const Player = ({ track }) => {
       console.error("No se encontró el token de Spotify.");
       return;
     }
+    if (!window.Spotify && !sdkReady) {
+      const script = document.createElement("script");
+      script.src = "https://sdk.scdn.co/spotify-player.js";
+      script.onload = () => {
+        window.onSpotifyWebPlaybackSDKReady = () => {
+          setSdkReady(true);
+          console.log("SDK de Spotify cargado correctamente.");
+        };
+      };
+      document.body.appendChild(script);
+    } else if (!sdkReady) {
+      setSdkReady(true);
+    }
+  }, [sdkReady]);
 
-    if (window.Spotify && sdkReady) {
+  useEffect(() => {
+    if (sdkReady && spotifyToken) {
+      console.log("Iniciando reproductor de Spotify...");
       const playerInstance = new Spotify.Player({
         name: "Spotify Clone Player",
         getOAuthToken: (cb) => {
           cb(spotifyToken);
         },
-        volume: 0.5,
       });
-
       playerInstance.addListener("ready", ({ device_id }) => {
         console.log("Reproductor listo con ID: ", device_id);
+        setDeviceId(device_id);
         setPlayer(playerInstance);
+        
+        playerInstance.setVolume(0.5)
+          .then(() => {
+            console.log("Volumen inicial establecido a 0.5");
+            setVolume(0.5);
+          })
+          .catch(error => console.error("Error al establecer volumen:", error));
+      
+        fetch('https://api.spotify.com/v1/me/player', {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${spotifyToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            device_ids: [device_id],
+            play: false
+          })
+        });
       });
-
+  
       playerInstance.addListener("player_state_changed", (state) => {
         if (!state) return;
+        console.log("Estado del reproductor cambiado:", state);
         setIsPlaying(state.paused === false);
+      
+        if (!state.paused) {
+          console.log("Reproducción iniciada...");
+        } else {
+          console.log("Reproducción pausada.");
+        }
       });
-
-      playerInstance.connect();
-
+  
+      playerInstance.connect().then((success) => {
+        if (success) {
+          console.log("Reproductor conectado exitosamente");
+        } else {
+          console.error("No se pudo conectar el reproductor.");
+        }
+      });
+  
       return () => {
         playerInstance.disconnect();
       };
     }
-  }, [spotifyToken, sdkReady]);
-
-  useEffect(() => {
-    if (!window.Spotify && !sdkReady) {
-      const script = document.createElement("script");
-      script.src = "https://sdk.scdn.co/spotify-player.js";
-      script.onload = () => setSdkReady(true);
-      document.body.appendChild(script);
-    } else {
-      setSdkReady(true);
-    }
-  }, [sdkReady]);
+  }, [sdkReady, spotifyToken]);
 
   const togglePlay = () => {
     if (!player) return;
-
-    if (isPlaying) {
-      player.pause();
-    } else {
-      player.resume();
-    }
-  };
-
-  const playTrack = (uri) => {
-    if (!player) return;
-
-    player.play({
-      uris: [uri],
-    }).then(() => {
-      console.log("Pista iniciada correctamente");
-    }).catch((err) => {
-      console.error("Error al intentar reproducir la pista: ", err);
-    });
+  
+    player.togglePlay()
+      .then(() => setIsPlaying(!isPlaying))
+      .catch(err => {
+        if (err.message.includes('DEVICE_NOT_CONTROLLABLE')) {
+        }
+      });
   };
 
   useEffect(() => {
-    if (track?.uri) {
-      playTrack(track.uri);
+    if (track?.uri && deviceId) {
+      console.log(`Reproduciendo: ${track.uri}`);
+      
+      fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${spotifyToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          uris: [track.uri],
+          position_ms: 0
+        })
+      })
+      .then(response => {
+        if (!response.ok) throw new Error('Error al reproducir');
+        setIsPlaying(true);
+      })
+      .catch(console.error);
     }
-  }, [track]);
+  }, [track, deviceId, spotifyToken]);
+
+  const nextTrack = () => {
+    console.log("Botón siguiente pista presionado.");
+    if (!player) return;
+
+    player.nextTrack().then(() => {
+      console.log("Siguiente pista");
+    }).catch((err) => {
+      console.error("Error al intentar avanzar a la siguiente pista: ", err);
+    });
+  };
+
+  const previousTrack = () => {
+    console.log("Botón pista anterior presionado.");
+    if (!player) return;
+
+    player.previousTrack().then(() => {
+      console.log("Pista anterior");
+    }).catch((err) => {
+      console.error("Error al intentar retroceder a la pista anterior: ", err);
+    });
+  };
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-gray-900 text-white shadow-lg">
@@ -98,7 +164,7 @@ const Player = ({ track }) => {
           <div className="flex items-center space-x-4">
             <button
               className="text-gray-400 hover:text-white"
-              onClick={() => console.log("Previous Track")}
+              onClick={previousTrack}
             >
               ⏮
             </button>
@@ -110,10 +176,32 @@ const Player = ({ track }) => {
             </button>
             <button
               className="text-gray-400 hover:text-white"
-              onClick={() => console.log("Next Track")}
+              onClick={nextTrack}
             >
               ⏭
             </button>
+            <div className="flex items-center space-x-2 ml-4">
+              <span className="text-sm">🔊</span>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={volume}
+                onChange={(e) => {
+                  const newVolume = parseFloat(e.target.value);
+                  setVolume(newVolume);
+                  if (player) {
+                    player.setVolume(newVolume)
+                      .catch(error => console.error('Error al cambiar volumen:', error));
+                  }
+                }}
+                className="w-24 h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer"
+              />
+              <span className="text-sm w-12">
+                {Math.round(volume * 100)}%
+              </span>
+            </div>
           </div>
         </div>
       </div>

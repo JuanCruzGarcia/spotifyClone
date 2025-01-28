@@ -27,7 +27,7 @@ export const getPlaylists = async (spotifyToken) => {
   
       if (response.status === 401) {
         localStorage.removeItem("spotifyToken");
-        window.location.href = "/login";
+        window.location.href = "/";
       }
   
       if (!response.ok) {
@@ -52,7 +52,7 @@ export const getPlaylists = async (spotifyToken) => {
     
     if (response.status === 401) {
       localStorage.removeItem("spotifyToken");
-      window.location.href = "/login";
+      window.location.href = "/";
       return [];
     }
   
@@ -74,7 +74,7 @@ export const getPlaylists = async (spotifyToken) => {
   
     if (response.status === 401) {
       localStorage.removeItem('spotifyToken');
-      window.location.href = '/login';
+      window.location.href = '/';
       return null;
     }
   
@@ -84,4 +84,29 @@ export const getPlaylists = async (spotifyToken) => {
   
     const data = await response.json();
     return data;
+  };
+  
+  export const transferPlayback = async (deviceId, spotifyToken) => {
+    try {
+      const url = `https://api.spotify.com/v1/me/player`;
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${spotifyToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          device_ids: [deviceId],
+          play: true, // Puedes cambiar esto según lo que necesites
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Error al transferir la reproducción");
+      }
+  
+      console.log("Reproducción transferida exitosamente");
+    } catch (error) {
+      console.error("Error en transferPlayback:", error);
+    }
   };

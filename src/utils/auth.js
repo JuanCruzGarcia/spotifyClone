@@ -7,9 +7,10 @@ const scopes = [
   "user-library-read",          
   "streaming",                  
   "user-read-playback-state",   
-  "user-modify-playback-state"
+  "user-modify-playback-state",
+  "playlist-read-collaborative",
+  "app-remote-control"
 ];
-
 export const loginUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(
   redirectUri
 )}&scope=${scopes.join("%20")}&show_dialog=true`;
