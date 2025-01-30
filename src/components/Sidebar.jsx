@@ -30,7 +30,7 @@ const Sidebar = ({ spotifyToken, setContent, setPlaylistTracks, setPlaylistDetai
   };
 
   return (
-    <div className="h-screen bg-black text-gray-400 flex flex-col overflow-y-auto overflow-y-scroll custom-scrollbar">
+    <div className="h-screen bg-[#121212] text-gray-400 flex flex-col overflow-y-auto overflow-y-scroll custom-scrollbar">
       <div className="p-4 text-white text-xl font-bold border-b border-gray-800">
         Spotify Clone
       </div>

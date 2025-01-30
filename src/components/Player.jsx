@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const Player = ({ track }) => {
+const Player = ({ track, playlistDetails, setCurrentTrack }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [player, setPlayer] = useState(null);
   const [sdkReady, setSdkReady] = useState(false);
@@ -66,6 +66,7 @@ const Player = ({ track }) => {
         if (!state) return;
         console.log("Estado del reproductor cambiado:", state);
         setIsPlaying(state.paused === false);
+        
       
         if (!state.paused) {
           console.log("Reproducción iniciada...");
@@ -100,8 +101,8 @@ const Player = ({ track }) => {
   };
 
   useEffect(() => {
-    if (track?.uri && deviceId) {
-      console.log(`Reproduciendo: ${track.uri}`);
+    if (track?.uri && deviceId && playlistDetails?.uri) {
+      console.log("Iniciando reproducción con contexto de playlist...");
       
       fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
         method: 'PUT',
@@ -110,7 +111,8 @@ const Player = ({ track }) => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          uris: [track.uri],
+          context_uri: playlistDetails.uri, // Usar URI de la playlist
+          offset: { uri: track.uri },       // Especificar track inicial
           position_ms: 0
         })
       })
@@ -120,8 +122,8 @@ const Player = ({ track }) => {
       })
       .catch(console.error);
     }
-  }, [track, deviceId, spotifyToken]);
-
+  }, [track, deviceId, spotifyToken, playlistDetails?.uri]);
+  
   const nextTrack = () => {
     console.log("Botón siguiente pista presionado.");
     if (!player) return;
@@ -134,18 +136,24 @@ const Player = ({ track }) => {
   };
 
   const previousTrack = () => {
-    console.log("Botón pista anterior presionado.");
     if (!player) return;
-
-    player.previousTrack().then(() => {
-      console.log("Pista anterior");
-    }).catch((err) => {
-      console.error("Error al intentar retroceder a la pista anterior: ", err);
+  
+    player.previousTrack().catch(err => {
+      console.error("Error en previousTrack:", err);
+      // Si hay error, forzar reinicio de pista
+      if (err.message.includes("NO_PREV_TRACK")) {
+        fetch(`https://api.spotify.com/v1/me/player/seek?position_ms=0&device_id=${deviceId}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${spotifyToken}`
+          }
+        });
+      }
     });
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gray-900 text-white shadow-lg">
+    <div className="fixed bottom-0 left-0 right-0 bg-black text-white shadow-lg">
       <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center space-x-4">
           <img
@@ -154,8 +162,8 @@ const Player = ({ track }) => {
             className="w-16 h-16 rounded"
           />
           <div>
-            <h3 className="text-lg font-semibold">{track?.name || "No Track"}</h3>
-            <p className="text-sm text-gray-400">
+            <h3 className="text-base font-semibold">{track?.name || "No Track"}</h3>
+            <p className="text-xs text-gray-400">
               {track?.artists?.map((artist) => artist.name).join(", ") || "Unknown Artist"}
             </p>
           </div>

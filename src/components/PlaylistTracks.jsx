@@ -4,7 +4,7 @@ const PlaylistTracks = ({ playlistTracks, playlistDetails, tracks, setCurrentTra
   if (!playlistDetails) return null;
 
   return (
-    <div className="px-2 pt-4 pb-2">
+    <div className="px-2 pt-4">
       <div className="mb-6 flex">
     <img
       src={playlistDetails.images[0]?.url}
@@ -20,7 +20,7 @@ const PlaylistTracks = ({ playlistTracks, playlistDetails, tracks, setCurrentTra
     </div>
   </div>
       <div className="overflow-x-auto">
-        <table className="min-w-full table-auto rounded-lg shadow-lg bg-black text-white">
+        <table className="min-w-full table-auto rounded-lg shadow-lg bg-[#121212] text-white">
           <thead>
             <tr>
               <th className="px-6 py-3 text-left text-sm font-semibold text-gray-400">#</th>

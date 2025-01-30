@@ -10,20 +10,24 @@ const Layout = () => {
   const [playlistDetails, setPlaylistDetails] = useState(null);
   const [sidebarWidth, setSidebarWidth] = useState(280);
   const [currentTrack, setCurrentTrack] = useState(null);
+
   const handleResize = (e) => {
     const newWidth = e.clientX;
     if (newWidth >= 240 && newWidth <= 450) {
       setSidebarWidth(newWidth);
     }
   };
+
   const stopResize = () => {
     window.removeEventListener('mousemove', handleResize);
     window.removeEventListener('mouseup', stopResize);
   };
+
   const startResize = () => {
     window.addEventListener('mousemove', handleResize);
     window.addEventListener('mouseup', stopResize);
   };
+
   const renderContent = () => {
     switch (content) {
       case 'playlist':
@@ -53,9 +57,15 @@ const Layout = () => {
 
   return (
     <div className="flex h-screen">
-      <div
-        className="bg-gray-800 text-white"
-        style={{ width: `${sidebarWidth}px`, minWidth: '200px', maxWidth: '400px' }}
+      {/* Sidebar con ajuste de altura dinámico */}
+      <div 
+        className="bg-gray-800 text-white overflow-y-auto custom-scrollbar" 
+        style={{ 
+          width: `${sidebarWidth}px`, 
+          minWidth: '200px', 
+          maxWidth: '400px', 
+          height: 'calc(100vh - 80px)' // Ajuste para que no se sobreponga al Player
+        }}
       >
         <Sidebar
           spotifyToken={spotifyToken}
@@ -64,16 +74,24 @@ const Layout = () => {
           setPlaylistDetails={setPlaylistDetails}
         />
       </div>
-      <div
-        className="w-1 bg-gray-600 cursor-col-resize"
-        onMouseDown={startResize}
-      ></div>
-      <div className="flex-1 bg-gray-900 text-white overflow-y-auto overflow-y-scroll custom-scrollbar">
+
+      {/* Resizable Divider */}
+      <div className="w-1 bg-black cursor-col-resize" onMouseDown={startResize}></div>
+
+      {/* Main Content */}
+      <div className="flex-1 bg-black text-white overflow-y-auto custom-scrollbar pb-20">
         {renderContent()}
       </div>
-      <Player track={currentTrack} />
+
+      {/* Player */}
+      <div className="fixed bottom-0 left-0 w-full bg-gray-900 p-4 mt-4">
+        <Player
+          track={currentTrack} 
+          playlistDetails={playlistDetails}
+          setCurrentTrack={setCurrentTrack}
+        />
+      </div>
     </div>
   );
 };
-
 export default Layout;
