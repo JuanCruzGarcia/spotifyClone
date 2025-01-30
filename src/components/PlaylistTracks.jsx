@@ -1,6 +1,6 @@
 import React from 'react';
 
-const PlaylistTracks = ({ playlistTracks, playlistDetails, tracks, setCurrentTrack  }) => {
+const PlaylistTracks = ({ playlistTracks, playlistDetails, setCurrentTrack }) => {
   if (!playlistDetails) return null;
 
   return (
@@ -30,8 +30,18 @@ const PlaylistTracks = ({ playlistTracks, playlistDetails, tracks, setCurrentTra
             </tr>
           </thead>
           <tbody>
-            {playlistTracks.map((track, index) => (
-              <tr key={track.id} className="hover:bg-[#343434] transition-colors duration-200 h-6" onClick={() => setCurrentTrack(track)}>
+          {playlistTracks.map((track, index) => (
+              <tr 
+              key={track.id} 
+              className="hover:bg-[#343434] transition-colors duration-200 h-6" 
+              onClick={() => {
+                setCurrentTrack({
+                  ...track,
+                  contextUri: playlistDetails.uri,
+                  index: index // Añadir índice actual
+                });
+              }}
+            >
                 <td className="px-6 py-2 text-sm text-gray-400">{index + 1}</td>
                 <td className="px-6 py-2 text-sm flex items-start">
                   <img

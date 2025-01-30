@@ -57,14 +57,13 @@ const Layout = () => {
 
   return (
     <div className="flex h-screen">
-      {/* Sidebar con ajuste de altura dinámico */}
       <div 
         className="bg-gray-800 text-white overflow-y-auto custom-scrollbar" 
         style={{ 
           width: `${sidebarWidth}px`, 
           minWidth: '200px', 
           maxWidth: '400px', 
-          height: 'calc(100vh - 80px)' // Ajuste para que no se sobreponga al Player
+          height: 'calc(100vh - 80px)'
         }}
       >
         <Sidebar
@@ -75,21 +74,19 @@ const Layout = () => {
         />
       </div>
 
-      {/* Resizable Divider */}
       <div className="w-1 bg-black cursor-col-resize" onMouseDown={startResize}></div>
 
-      {/* Main Content */}
       <div className="flex-1 bg-black text-white overflow-y-auto custom-scrollbar pb-20">
         {renderContent()}
       </div>
 
-      {/* Player */}
       <div className="fixed bottom-0 left-0 w-full bg-gray-900 p-4 mt-4">
-        <Player
-          track={currentTrack} 
-          playlistDetails={playlistDetails}
-          setCurrentTrack={setCurrentTrack}
-        />
+      <Player
+        track={currentTrack} 
+        playlistDetails={playlistDetails}
+        setCurrentTrack={setCurrentTrack}
+        playlistTracks={playlistTracks}
+      />
       </div>
     </div>
   );
